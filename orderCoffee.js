@@ -1,6 +1,7 @@
 'use strict';
 
 const lexResponses = require('./lexResponses');
+const databaseManager = require('./databaseManager');
 
 const types = ['latte', 'americano', 'cappuccino', 'expresso'];
 const sizes = ['double', 'normal', 'large'];
@@ -50,6 +51,22 @@ function validateCoffeeOrder(coffeeType, coffeeSize) {
     return buildValidationResult(true, null, null);
 }
 
+function buildFulfilmentResult(fullfilmentState, messageContent) {
+  return {
+    fullfilmentState,
+    message: { contentType: 'PlainText', content: messageContent}
+  }
+}
+
+function fullfilOrder(coffeeType, coffeeSize) {
+  console.log('fulfilOrder ' + coffeeType + ' ' + coffeeSize);
+
+  return databaseManager.saveOrderToDatabase(coffeeType, coffeeSize).then((item) => {
+    console.log(item.orderId);
+    return buildFulfilmentResult('Fulfilled', `Thanks, your orderid ${item.orderId} has been placed and will be ready for pickup in the bar`);
+  });
+}
+
 module.exports = function(intentRequest, callback) {
   var coffeeType = intentRequest.currentIntent.slots.coffee;
   var coffeeSize = intentRequest.currentIntent.slots.size;
@@ -75,5 +92,12 @@ module.exports = function(intentRequest, callback) {
 
     callback(lexResponses.delegate(intentRequest.sessionAttributes, intentRequest.currentIntent.slots));
     return;
+  }
+
+  if (source === 'FulfillmentCodeHook') {
+    return fullfilOrder(coffeeType, coffeeSize).then(fullfiledOrder => {
+      callback(lexResponses.close(intentRequest.sessionAttributes, fullfiledOrder.fullfilmentState, fullfiledOrder.message));
+      return;
+    });
   }
 }
