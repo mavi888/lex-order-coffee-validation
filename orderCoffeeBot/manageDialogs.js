@@ -1,7 +1,7 @@
 'use strict';
 
-const lexResponses = require('./lexResponses');
-const databaseManager = require('./databaseManager');
+const lexResponses = require('../lexResponses');
+const databaseManager = require('../databaseManager');
 
 const types = ['latte', 'americano', 'cappuccino', 'expresso'];
 const sizes = ['double', 'normal', 'large'];
@@ -49,50 +49,21 @@ function validateCoffeeOrder(coffeeType, coffeeSize) {
   return buildValidationResult(true, null, null);
 }
 
-function buildFulfilmentResult(fullfilmentState, messageContent) {
-  return {
-    fullfilmentState,
-    message: { contentType: 'PlainText', content: messageContent }
-  };
-}
-
-function fullfilOrder(coffeeType, coffeeSize) {
-  console.log('fulfilOrder ' + coffeeType + ' ' + coffeeSize);
-
-  return databaseManager.saveOrderToDatabase(coffeeType, coffeeSize).then(item => {
-    console.log(item.orderId);
-    return buildFulfilmentResult('Fulfilled', `Thanks, your orderid ${item.orderId} has been placed and will be ready for pickup in the bar`);
-  });
-}
-
 module.exports = function(intentRequest) {
   var coffeeType = intentRequest.currentIntent.slots.coffee;
   var coffeeSize = intentRequest.currentIntent.slots.size;
-  console.log(coffeeType + ' ' + coffeeSize);
+  const slots = intentRequest.currentIntent.slots;
 
-  const source = intentRequest.invocationSource;
+  const validationResult = validateCoffeeOrder(coffeeType, coffeeSize);
 
-  if (source === 'DialogCodeHook') {
-    const slots = intentRequest.currentIntent.slots;
-    const validationResult = validateCoffeeOrder(coffeeType, coffeeSize);
-
-    if (!validationResult.isValid) {
-      slots[`${validationResult.violatedSlot}`] = null;
-      return Promise.resolve(lexResponses.elicitSlot(intentRequest.sessionAttributes, intentRequest.currentIntent.name, slots, validationResult.violatedSlot, validationResult.message));
-    }
-
-    //If size is not define then set it as normal
-    if (coffeeSize == null) {
-      intentRequest.currentIntent.slots.size = 'normal';
-    }
-    console.log(intentRequest.currentIntent.slots);
-
-    return Promise.resolve(lexResponses.delegate(intentRequest.sessionAttributes, intentRequest.currentIntent.slots));
+  if (!validationResult.isValid) {
+    slots[`${validationResult.violatedSlot}`] = null;
+    return Promise.resolve(lexResponses.elicitSlot(intentRequest.sessionAttributes, intentRequest.currentIntent.name, slots, validationResult.violatedSlot, validationResult.message));
   }
 
-  if (source === 'FulfillmentCodeHook') {
-    return fullfilOrder(coffeeType, coffeeSize).then(fullfiledOrder => {
-      return lexResponses.close(intentRequest.sessionAttributes, fullfiledOrder.fullfilmentState, fullfiledOrder.message);
-    });
+  //If size is not define then set it as normal
+  if (coffeeSize == null) {
+    intentRequest.currentIntent.slots.size = 'normal';
   }
+  return Promise.resolve(lexResponses.delegate(intentRequest.sessionAttributes, intentRequest.currentIntent.slots));
 };

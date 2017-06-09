@@ -1,6 +1,6 @@
 'use strict';
 
-const orderCoffee = require('./orderCoffee');
+const orderCoffee = require('./orderCoffeeBot/orderCoffee');
 
 module.exports = function(intentRequest) {
   console.log(`dispatch userId=${intentRequest.userId}, intentName=${intentRequest.currentIntent.name}`);
@@ -8,6 +8,7 @@ module.exports = function(intentRequest) {
 
   if (intentName === 'CoffeeOrder') {
     console.log(intentName + ' was called');
+    console.log(intentRequest);
     return orderCoffee(intentRequest);
   }
 
