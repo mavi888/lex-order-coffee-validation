@@ -27,6 +27,7 @@ provider:
         - dynamodb:PutItem
       Resource:
         - "Fn::Join": ["", ["arn:aws:dynamodb:", {"Ref": "AWS::Region"}, ":", {"Ref": "AWS::AccountId"}, ":table/coffee-order-table*"]]
+        - "Fn::Join": ["", ["arn:aws:dynamodb:", {"Ref": "AWS::Region"}, ":", {"Ref": "AWS::AccountId"}, ":table/coffee-user-table*"]]
 
 # you can overwrite defaults here
 #  stage: dev
@@ -64,7 +65,17 @@ provider:
 functions:
   intents:
     handler: handler.intents
-
+  saveUserFavorites:
+    handler: handler.saveUserFavorites
+    events:
+      - stream:
+          type: dynamodb
+          arn:
+            Fn::GetAtt:
+              - CoffeeOrdersTable
+              - StreamArn
+          batchSize: 1
+          startingPosition: LATEST
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details
@@ -109,6 +120,21 @@ resources:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
         TableName: "coffee-order-table"
+        StreamSpecification:
+          StreamViewType: NEW_IMAGE
+    CoffeeUserTable:
+      Type: "AWS::DynamoDB::Table"
+      Properties:
+        AttributeDefinitions:
+        - AttributeName: "userId"
+          AttributeType: "S"
+        KeySchema:
+        - AttributeName: "userId"
+          KeyType: "HASH"
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: "coffee-user-table"
 #resources:
 #  Resources:
 #    NewResource:

@@ -14,8 +14,23 @@ module.exports.saveOrderToDatabase = function(userId, coffeeType, coffeeSize) {
   item.size = coffeeSize;
   item.userId = userId;
 
+  return saveItemToTable('coffee-order-table', item);
+};
+
+module.exports.saveUserToDatabase = function(userId, coffeeType, coffeeSize) {
+  console.log('saveUserToDatabase');
+
+  const item = {};
+  item.drink = coffeeType;
+  item.size = coffeeSize;
+  item.userId = userId;
+
+  return saveItemToTable('coffee-user-table', item);
+};
+
+function saveItemToTable(tableName, item) {
   const params = {
-    TableName: 'coffee-order-table',
+    TableName: tableName,
     Item: item
   };
 
@@ -23,10 +38,10 @@ module.exports.saveOrderToDatabase = function(userId, coffeeType, coffeeSize) {
 
   return putAsync(params)
     .then(() => {
-      console.log(`Saving order ${JSON.stringify(item)}`);
+      console.log(`Saving item ${JSON.stringify(item)}`);
       return item;
     })
     .catch(error => {
       Promise.reject(error);
     });
-};
+}
