@@ -5,13 +5,14 @@ const AWS = require('aws-sdk');
 const promisify = require('es6-promisify');
 const dynamo = new AWS.DynamoDB.DocumentClient();
 
-module.exports.saveOrderToDatabase = function(coffeeType, coffeeSize) {
+module.exports.saveOrderToDatabase = function(userId, coffeeType, coffeeSize) {
   console.log('saveOrderToDatabase');
 
   const item = {};
   item.orderId = uuidV1();
   item.drink = coffeeType;
   item.size = coffeeSize;
+  item.userId = userId;
 
   const params = {
     TableName: 'coffee-order-table',
@@ -20,10 +21,12 @@ module.exports.saveOrderToDatabase = function(coffeeType, coffeeSize) {
 
   const putAsync = promisify(dynamo.put, dynamo);
 
-  return putAsync(params).then(() => {
-    console.log(`Saving order ${JSON.stringify(item)}`);
-    return item;
-  }).catch((error) => {
-    Promise.reject(error);
-  });
-}
+  return putAsync(params)
+    .then(() => {
+      console.log(`Saving order ${JSON.stringify(item)}`);
+      return item;
+    })
+    .catch(error => {
+      Promise.reject(error);
+    });
+};
