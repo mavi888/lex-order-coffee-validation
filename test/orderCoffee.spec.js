@@ -21,7 +21,7 @@ describe('DialogCodeHook witn no slots', () => {
 
     const expectedResponse = {
       sessionAttributes: null,
-      dialogAction: { type: 'Delegate', slots: { size: 'normal', coffee: null } }
+      dialogAction: { type: 'Delegate', slots: { size: null, coffee: null } }
     };
 
     orderCoffee(intentRequest).then(response => {
@@ -51,6 +51,43 @@ describe('DialogCodeHook with drink slot', () => {
     const expectedResponse = {
       sessionAttributes: null,
       dialogAction: { type: 'Delegate', slots: { size: 'normal', coffee: 'latte' } }
+    };
+
+    orderCoffee(intentRequest).then(response => {
+      assert.equal(JSON.stringify(expectedResponse), JSON.stringify(response));
+      done();
+    });
+  });
+});
+
+describe('DialogCodeHook with drink slot - known user', () => {
+  it('Inital message - I will like to order latte', done => {
+    const intentRequest = {
+      messageVersion: '1.0',
+      invocationSource: 'DialogCodeHook',
+      userId: 'wetcu9ufuyanvsevpopwonf33c04ex0z',
+      sessionAttributes: null,
+      bot: { name: 'CaffeBotio', alias: null, version: '$LATEST' },
+      outputDialogMode: 'Text',
+      currentIntent: {
+        name: 'CoffeeOrder',
+        slots: { size: null, coffee: null },
+        confirmationStatus: 'None'
+      },
+      inputTranscript: 'i will like to order a drink'
+    };
+
+    const expectedResponse = {
+      sessionAttributes: null,
+      dialogAction: {
+        type: 'ConfirmIntent',
+        intentName: 'CoffeeOrder',
+        slots: { size: 'normal', coffee: 'latte' },
+        message: {
+          contentType: 'PlainText',
+          content: 'Would you like to order a normal latte?'
+        }
+      }
     };
 
     orderCoffee(intentRequest).then(response => {

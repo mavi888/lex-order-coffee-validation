@@ -25,6 +25,7 @@ provider:
     - Effect: Allow
       Action:
         - dynamodb:PutItem
+        - dynamodb:GetItem
       Resource:
         - "Fn::Join": ["", ["arn:aws:dynamodb:", {"Ref": "AWS::Region"}, ":", {"Ref": "AWS::AccountId"}, ":table/coffee-order-table*"]]
         - "Fn::Join": ["", ["arn:aws:dynamodb:", {"Ref": "AWS::Region"}, ":", {"Ref": "AWS::AccountId"}, ":table/coffee-user-table*"]]

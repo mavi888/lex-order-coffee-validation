@@ -12,6 +12,7 @@
   "dependencies": {
     "aws-sdk": "^2.60.0",
     "es6-promisify": "^5.0.0",
+    "lodash": "^4.17.4",
     "uuid": "^3.0.1"
   },
   "devDependencies": {
