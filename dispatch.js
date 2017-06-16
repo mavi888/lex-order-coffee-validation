@@ -8,7 +8,6 @@ module.exports = function(intentRequest) {
 
   if (intentName === 'CoffeeOrder') {
     console.log(intentName + ' was called');
-    console.log(intentRequest);
     return orderCoffee(intentRequest);
   }
 

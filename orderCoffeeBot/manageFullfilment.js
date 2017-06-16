@@ -12,7 +12,6 @@ function buildFulfilmentResult(fullfilmentState, messageContent) {
 
 function fullfilOrder(userId, coffeeType, coffeeSize) {
   return databaseManager.saveOrderToDatabase(userId, coffeeType, coffeeSize).then(item => {
-    console.log(item.orderId);
     return buildFulfilmentResult('Fulfilled', `Thanks, your orderid ${item.orderId} has been placed and will be ready for pickup in the bar`);
   });
 }
